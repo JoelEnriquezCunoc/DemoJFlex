@@ -18,6 +18,8 @@ newLine = [\n]
 
 %%
 
+{whitespace}+ {/*Ignore*/}
+{newLine}+ {/*Ignore*/}
 {letter}({digit}|{letter})* {return new Token(TokenConstant.ID, yytext());}
 {digit}+ {return new Token(TokenConstant.NUM, yytext());}
 

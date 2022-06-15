@@ -3,7 +3,10 @@ package com.joel;
 import com.joel.DemoLexer;
 import picocli.CommandLine;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.StringReader;
+import java.nio.file.Files;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
 
@@ -15,21 +18,35 @@ import java.util.concurrent.Callable;
 description = "Simple lexer that recognizes ID, NUM and EOF")
 public class App implements Callable<Integer>
 {
-
+    @CommandLine.Option(names = {"-f","--file"},description = "File to read", required = false)
+    private File file;
 
     @Override
     public Integer call() throws Exception {
-        Scanner scanner = new Scanner(System.in);
-        String input = "";
-        while (!input.equals("exit")){
-            System.out.print("Por favor ingrese la cadena > ");
-            input = scanner.nextLine();
-            if (input.equals("exit")){
-                break;
+
+        if (file!=null){
+            BufferedReader bufferedReader = Files.newBufferedReader(file.toPath());
+            DemoLexer demoLexer = new DemoLexer(bufferedReader);
+            Token token = demoLexer.yylex();
+            while (token.getTokenType()!=TokenConstant.ERROR){
+                System.out.println(token);
+                token = demoLexer.yylex();
             }
-            DemoLexer demoLexer = new DemoLexer(new StringReader(input));
-            
+        } else {
+            Scanner scanner = new Scanner(System.in);
+            String input = "";
+            while (!input.equals("exit")){
+                System.out.print("Por favor ingrese la cadena > ");
+                input = scanner.nextLine();
+                if (input.equals("exit")){
+                    break;
+                }
+                DemoLexer demoLexer = new DemoLexer(new StringReader(input));
+                Token token = demoLexer.yylex();
+                System.out.println(token);
+            }
         }
+        return 0;
     }
 
     public static void main( String[] args )
